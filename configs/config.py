@@ -1,9 +1,12 @@
-# minimal essential config for U-Net
+# config.py
+# minimal essential config for U-Net replication
 
 seed = 42
 device = 'cuda'
 
 # data
+data_root = './data/raw'
+mask_root = './data/masks'
 batch_size = 1
 tile_size = 256
 overlap = 32
@@ -18,9 +21,9 @@ epochs = 50
 lr = 0.001
 momentum = 0.99
 weight_decay = 1e-4
-use_weight_map = True
 
-# loss & weight map
+# loss & weight 
+use_weight_map = True
 loss_type = 'weighted_cross_entropy'
 optimizer_type = 'SGD'
 
@@ -28,3 +31,7 @@ optimizer_type = 'SGD'
 save_dir = './checkpoints'
 log_dir = './logs'
 save_every = 5
+
+
+
+
