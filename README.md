@@ -13,69 +13,67 @@ This repository contains a PyTorch replication of the **U-Net: Convolutional Net
 ---
 
 
-## 🎺 Model Architecture Overview
+## 🖼 Overview – U-Net Architecture
 
-The U‑Net model consists of **four main parts**: contracting path, bottleneck, expansive path, and final output layer.
+![U-Net Overview](images/figmix.jpg)  
+*Figure:* U‑Net architecture showing **contracting path (encoder)**, **bottleneck**, **expansive path (decoder)**, and skip connections for precise pixel-wise segmentation.
 
-### 1️⃣ Contracting Path (Encoder)  
-- Reduces spatial dimensions while increasing feature channels.  
-- Each step: **2×3×3 Conv + ReLU → MaxPool (2×2)**.  
+- **Contracting Path (Encoder):** Reduces spatial size while increasing feature channels. Each block: 3×3 Conv → ReLU → 3×3 Conv → ReLU → MaxPool.  
+- **Bottleneck:** Compresses deepest feature maps (smallest spatial size, highest channels) before expansion.  
+- **Expansive Path (Decoder):** Upsamples features, concatenates with corresponding encoder outputs (skip connections), applies conv blocks.  
+- **Final Layer:** 1×1 Conv maps features to the number of segmentation classes.  
+- **Key Idea:** Skip connections preserve spatial details, allowing precise segmentation even in deep networks.
 
-```python
-s1 = self.enc1(x)              # 512x512 -> 512x512, 1->64
-s2 = self.enc2(self.pool(s1))  # 512x512 -> 256x256, 64->128
-s3 = self.enc3(self.pool(s2))  # 256x256 -> 128x128, 128->256
-s4 = self.enc4(self.pool(s3))  # 128x128 -> 64x64, 256->512
-```
+### 🔑 Key Formulas
 
-### 2️⃣ Bottleneck
-- The deepest layer with smallest spatial size but highest feature channels.
-- Compresses information before decoder:
-```python
-b = self.bottleneck(self.pool(s4))  # 64x64 -> 32x32, 512->1024
-```
-### 3️⃣ Expansive Path (Decoder)
+1. **Convolutional Layer (ConvBlock):**  
 
-- Upsamples feature maps, concatenates corresponding encoder features (skip connection / mirroring), then applies ConvBlock.
+$$y = f(W * x + b)$$
 
-```python
-d4 = self.up4(b, s4)  # 32x32 -> 64x64
-d3 = self.up3(d4, s3) # 64x64 -> 128x128
-d2 = self.up2(d3, s2) # 128x128 -> 256x256
-d1 = self.up1(d2, s1) # 256x256 -> 512x512
-```
-- This recovers spatial details lost during encoding and sharpens object boundaries.
- 
-### 4️⃣ Final Layer
+- Standard 3×3 convolution, ReLU activation.
 
-- 1×1 Conv reduces feature channels to the number of classes.
-```python
-out = self.final(d1)  # Pixel-wise class prediction
-```
+2. **Up-Convolution (Decoder):**  
+
+$$y_\text{up} = \text{Conv2d}(\text{Upsample}(x_\text{prev}) \oplus x_\text{skip})$$
+
+- Upsample previous feature map, concatenate with encoder feature map, apply conv block.
+
+3. **Final Pixel-wise Prediction:**  
+
+$$\hat{y}_{i,j,c} = \text{softmax}(y_{i,j,c})$$
+
+- For each pixel $(i,j)$, outputs class probabilities $c$.
+
 ---
-## Project Structure
+
+## 🏗 Project Structure
+
 ```bash
 U-Net-Replicating/
 │
 ├── models/
-│   ├── unet.py                # Contracting + Expanding path, full U-Net architecture
-│   ├── conv_block.py          # 3x3 Conv + ReLU + 3x3 Conv + ReLU block
-│   ├── upconv_block.py        # Up-conv (2x2) + concat + conv block
-│   └── init_weights.py        # He initialization function
+│   ├── unet.py
+│   ├── conv_block.py
+│   ├── upconv_block.py
+│   └── init_weights.py
 │
 ├── training_utils/
-│   ├── augmentation.py        # Elastic deformation, rotation, shift, gray variation
-│   ├── loss.py                # Pixel-wise softmax + weighted cross-entropy
-│   └── optimizer.py           # Example: SGD + momentum function
+│   ├── augmentation.py
+│   ├── loss.py
+│   └── optimizer.py
 │
 ├── configs/
-│   └── config.py              # Example parameters: batch size=1, momentum=0.99, tile size, lr
+│   └── config.py
 │
 ├── scripts/
-│   └── preprocess_dataset.py  # Tile cropping, augmentation showcase
+│   └── preprocess_dataset.py
 │
-├── requirements.txt           # Python dependencies
-└── README.md                  # Paper summary, usage, references
+├── images/
+│   └── figmix.jpg
+│
+├── requirements.txt
+└── README.md
+
 ```
 
 ---
