@@ -24,6 +24,8 @@ This repository contains a PyTorch replication of the **U-Net: Convolutional Net
 - **Final Layer:** 1×1 Conv maps features to the number of segmentation classes.  
 - **Key Idea:** Skip connections preserve spatial details, allowing precise segmentation even in deep networks.
 
+---
+
 ### 🔑 Key Formulas
 
 1. **Convolutional Layer (ConvBlock):**  
